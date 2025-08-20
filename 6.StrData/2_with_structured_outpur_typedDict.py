@@ -1,5 +1,6 @@
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
+from typing import TypedDict
 import os
 
 load_dotenv()
@@ -10,16 +11,13 @@ llm1 = HuggingFaceEndpoint(
     task="text-generation"
 )
 model = ChatHuggingFace(llm=llm1)
-chat_history = []
-while True:
-    user_input = input("You: ")
-    chat_history.append(user_input)
-    if user_input.lower() in ['exit', 'quit']:
-        print("Goodbye!")
-        break
-    result = model.invoke(chat_history)
-    chat_history.append(result.content)
 
-    print("AI:", result.content)
+class Review(TypedDict):
+    summary:str
+    sentiment:str
 
-print(chat_history)
+structured_model = model.with_structured_output(Review)
+result = structured_model.invoke("""
+the hardware is great but software feels bloated. there are too many pre-installed apps that i cant remove. also UI looks outdated""")
+
+print(result)
